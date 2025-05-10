@@ -1,0 +1,5 @@
+log: 'mcp-greeting.log'
+debug: false
+
+greeting:
+  default_message: "こんにちは！"

@@ -1,0 +1,35 @@
+# Git related
+.git
+.gitignore
+
+# Build artifacts
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Log files
+*.log
+
+# Temporary files
+tmp/
+temp/
+
+# Docker related
+Dockerfile
+.dockerignore
+
+# Markdown files (except README.md)
+*.md
+!README.md
+
+# Development files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+*_test.go
