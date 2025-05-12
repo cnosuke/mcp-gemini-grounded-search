@@ -3,60 +3,74 @@ package server
 import (
 	"context"
 
-	"github.com/cnosuke/mcp-greeting/greeter"
+	"github.com/cnosuke/mcp-gemini-grounded-search/searcher"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"go.uber.org/zap"
 )
 
-// GreetingHelloArgs - Arguments for greeting_hello tool (kept for testing compatibility)
-type GreetingHelloArgs struct {
-	Name string `json:"name" jsonschema:"description=Optional name for personalized greeting"`
-}
-
 // RegisterAllTools - Register all tools with the server
-func RegisterAllTools(mcpServer *server.MCPServer, greeter *greeter.Greeter) error {
-	// Register greeting_hello tool
-	if err := registerGreetingHelloTool(mcpServer, greeter); err != nil {
+func RegisterAllTools(mcpServer *server.MCPServer, searcher *searcher.Searcher) error {
+	// Register search tool
+	if err := registerSearchTool(mcpServer, searcher); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// registerGreetingHelloTool - Register the greeting_hello tool
-func registerGreetingHelloTool(mcpServer *server.MCPServer, greeter *greeter.Greeter) error {
-	zap.S().Debugw("registering greeting_hello tool")
+// registerSearchTool - Register the search tool
+func registerSearchTool(mcpServer *server.MCPServer, searcher *searcher.Searcher) error {
+	zap.S().Debugw("registering search tool")
 
 	// Define the tool
-	tool := mcp.NewTool("greeting_hello",
-		mcp.WithDescription("Generate a greeting message"),
-		mcp.WithString("name",
-			mcp.Description("Optional name for personalized greeting"),
+	tool := mcp.NewTool("search",
+		mcp.WithDescription("Search the web with Gemini grounded search"),
+		mcp.WithString("query",
+			mcp.Description("The search query"),
+			mcp.Required(), // 修正：引数なしで使用
+		),
+		mcp.WithNumber("max_token",
+			mcp.Description("Maximum number of tokens for the response"),
 		),
 	)
 
 	// Add the tool handler
 	mcpServer.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		// Extract name parameter
-		var name string
-		if nameVal, ok := request.Params.Arguments["name"].(string); ok {
-			name = nameVal
+		// Extract query parameter
+		query, ok := request.Params.Arguments["query"].(string)
+		if !ok || query == "" {
+			return mcp.NewToolResultError("Missing or empty query parameter"), nil
 		}
 
-		zap.S().Debugw("executing greeting_hello",
-			"name", name)
+		// Extract max_token parameter (optional)
+		var maxToken int
+		if maxTokenVal, ok := request.Params.Arguments["max_token"].(float64); ok {
+			maxToken = int(maxTokenVal)
+		}
 
-		// Generate greeting
-		greeting, err := greeter.GenerateGreeting(name)
+		zap.S().Debugw("executing search",
+			"query", query,
+			"max_token", maxToken)
+
+		// Perform search
+		response, err := searcher.Search(ctx, query, maxToken)
 		if err != nil {
-			zap.S().Errorw("failed to generate greeting",
-				"name", name,
+			zap.S().Errorw("failed to search",
+				"query", query,
 				"error", err)
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
-		return mcp.NewToolResultText(greeting), nil
+		// Convert response to JSON
+		jsonResponse, err := response.ToJSON()
+		if err != nil {
+			zap.S().Errorw("failed to convert response to JSON",
+				"error", err)
+			return mcp.NewToolResultError(err.Error()), nil
+		}
+
+		return mcp.NewToolResultText(jsonResponse), nil
 	})
 
 	return nil

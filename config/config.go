@@ -8,9 +8,10 @@ import (
 type Config struct {
 	Log    string `yaml:"log" default:"" env:"LOG_PATH"`
 	Debug  bool   `yaml:"debug" default:"false" env:"DEBUG"`
-	Greeting struct {
-		DefaultMessage string `yaml:"default_message" default:"Hello!" env:"GREETING_DEFAULT_MESSAGE"`
-	} `yaml:"greeting"`
+	Gemini struct {
+		APIKey    string `yaml:"api_key" env:"GEMINI_API_KEY" required:"true"`
+		ModelName string `yaml:"model_name" default:"gemini-2.5-flash-preview-04-17" env:"GEMINI_MODEL_NAME"`
+	} `yaml:"gemini"`
 }
 
 // LoadConfig - Load configuration file

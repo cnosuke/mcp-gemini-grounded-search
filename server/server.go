@@ -3,8 +3,8 @@ package server
 import (
 	"context"
 
-	"github.com/cnosuke/mcp-greeting/config"
-	"github.com/cnosuke/mcp-greeting/greeter"
+	"github.com/cnosuke/mcp-gemini-grounded-search/config"
+	"github.com/cnosuke/mcp-gemini-grounded-search/searcher"
 	"github.com/cockroachdb/errors"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -13,7 +13,7 @@ import (
 
 // Run - Execute the MCP server
 func Run(cfg *config.Config, name string, version string, revision string) error {
-	zap.S().Infow("starting MCP Greeting Server")
+	zap.S().Infow("starting MCP Gemini Grounded Search Server")
 
 	// Format version string with revision if available
 	versionString := version
@@ -21,11 +21,12 @@ func Run(cfg *config.Config, name string, version string, revision string) error
 		versionString = versionString + " (" + revision + ")"
 	}
 
-	// Create Greeter
-	zap.S().Debugw("creating Greeter")
-	greeterInstance, err := greeter.NewGreeter(cfg)
+	// Create Searcher
+	zap.S().Debugw("creating Searcher")
+	ctx := context.Background()
+	searcherInstance, err := searcher.NewSearcher(ctx, cfg)
 	if err != nil {
-		zap.S().Errorw("failed to create Greeter", "error", err)
+		zap.S().Errorw("failed to create Searcher", "error", err)
 		return err
 	}
 
@@ -52,7 +53,7 @@ func Run(cfg *config.Config, name string, version string, revision string) error
 
 	// Register all tools
 	zap.S().Debugw("registering tools")
-	if err := RegisterAllTools(mcpServer, greeterInstance); err != nil {
+	if err := RegisterAllTools(mcpServer, searcherInstance); err != nil {
 		zap.S().Errorw("failed to register tools", "error", err)
 		return err
 	}

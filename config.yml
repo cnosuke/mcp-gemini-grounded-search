@@ -1,5 +1,6 @@
-log: 'mcp-greeting.log'
+log: 'mcp-gemini-grounded-search.log'
 debug: false
 
-greeting:
-  default_message: "こんにちは！"
+gemini:
+  api_key: '' # Set via environment variable GEMINI_API_KEY
+  model_name: 'gemini-2.5-flash-preview-04-17'

@@ -19,8 +19,8 @@ RUN make build-for-linux-amd64
 FROM gcr.io/distroless/static:nonroot
 
 # Set metadata
-LABEL org.opencontainers.image.source="https://github.com/cnosuke/mcp-greeting"
-LABEL org.opencontainers.image.description="MCP server for greeting functionality"
+LABEL org.opencontainers.image.source="https://github.com/cnosuke/mcp-gemini-grounded-search"
+LABEL org.opencontainers.image.description="MCP server for web search using gemini with grounding"
 
 WORKDIR /app
 
@@ -28,13 +28,13 @@ WORKDIR /app
 COPY --from=builder /app/config.yml /app/config.yml
 
 # Copy the binary
-COPY --from=builder /app/bin/mcp-greeting-linux-amd64 /app/mcp-greeting
+COPY --from=builder /app/bin/mcp-gemini-grounded-search-linux-amd64 /app/mcp-gemini-grounded-search
 
 # Use nonroot user
 USER nonroot:nonroot
 
 # Set the entrypoint
-ENTRYPOINT ["/app/mcp-greeting"]
+ENTRYPOINT ["/app/mcp-gemini-grounded-search"]
 
 # Default command
 CMD ["server", "--config", "config.yml"]

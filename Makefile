@@ -1,4 +1,4 @@
-NAME     := mcp-greeting
+NAME     := mcp-gemini-grounded-search
 VERSION  := $(shell git describe --tags 2>/dev/null)
 REVISION := $(shell git rev-parse --short HEAD 2>/dev/null)
 SRCS    := $(shell find . -type f -name '*.go' -o -name 'go.*')
