@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/cnosuke/mcp-gemini-grounded-search/searcher"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -10,9 +11,9 @@ import (
 )
 
 // RegisterAllTools - Register all tools with the server
-func RegisterAllTools(mcpServer *server.MCPServer, searcher *searcher.Searcher) error {
+func RegisterAllTools(m *server.MCPServer, s *searcher.Searcher) error {
 	// Register search tool
-	if err := registerSearchTool(mcpServer, searcher); err != nil {
+	if err := registerSearchTool(m, s); err != nil {
 		return err
 	}
 
@@ -20,23 +21,23 @@ func RegisterAllTools(mcpServer *server.MCPServer, searcher *searcher.Searcher) 
 }
 
 // registerSearchTool - Register the search tool
-func registerSearchTool(mcpServer *server.MCPServer, searcher *searcher.Searcher) error {
+func registerSearchTool(m *server.MCPServer, s *searcher.Searcher) error {
 	zap.S().Debugw("registering search tool")
 
 	// Define the tool
 	tool := mcp.NewTool("search",
-		mcp.WithDescription("Search the web with Gemini grounded search"),
+		mcp.WithDescription("Searches the web using Gemini Grounded Search. Expect more accurate results by searching in a natural language question format rather than by keywords."),
 		mcp.WithString("query",
-			mcp.Description("The search query"),
-			mcp.Required(), // 修正：引数なしで使用
+			mcp.Description("The search query. Please describe it as if asking a question in natural language, rather than specifying keywords. Example: [What are the most contributive biological factors to human civilizational evolution, according to the latest research?]"),
+			mcp.Required(),
 		),
 		mcp.WithNumber("max_token",
-			mcp.Description("Maximum number of tokens for the response"),
+			mcp.Description(fmt.Sprintf("Maximum number of tokens for the response (default: %d)", s.DefaultMaxTokens)),
 		),
 	)
 
 	// Add the tool handler
-	mcpServer.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	m.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Extract query parameter
 		query, ok := request.Params.Arguments["query"].(string)
 		if !ok || query == "" {
@@ -54,7 +55,7 @@ func registerSearchTool(mcpServer *server.MCPServer, searcher *searcher.Searcher
 			"max_token", maxToken)
 
 		// Perform search
-		response, err := searcher.Search(ctx, query, maxToken)
+		response, err := s.Search(ctx, query, maxToken)
 		if err != nil {
 			zap.S().Errorw("failed to search",
 				"query", query,

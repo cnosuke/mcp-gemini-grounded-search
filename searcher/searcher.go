@@ -3,6 +3,7 @@ package searcher
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	search "github.com/cnosuke/go-gemini-grounded-search"
 	"github.com/cnosuke/mcp-gemini-grounded-search/config"
@@ -13,7 +14,10 @@ import (
 // Searcher - Search interface
 type Searcher struct {
 	client *search.Client
-	cfg    *config.Config
+
+	DefaultModel         string
+	DefaultMaxTokens     int
+	DefaultQueryTemplate string
 }
 
 // SearchResponse - Response for search results
@@ -42,27 +46,42 @@ func NewSearcher(ctx context.Context, cfg *config.Config) (*Searcher, error) {
 		return nil, errors.Wrap(err, "failed to create Gemini client")
 	}
 
+	defaultMaxTokens := cfg.Gemini.MaxTokens
+	if defaultMaxTokens <= 0 {
+		defaultMaxTokens = 5000 // Default value if not set
+	}
+
 	return &Searcher{
-		client: client,
-		cfg:    cfg,
+		client:               client,
+		DefaultMaxTokens:     defaultMaxTokens,
+		DefaultModel:         cfg.Gemini.ModelName,
+		DefaultQueryTemplate: cfg.Gemini.QueryTemplate,
 	}, nil
 }
 
 // Search - Perform a search with the given query and max token limit
 func (s *Searcher) Search(ctx context.Context, query string, maxTokens int) (*SearchResponse, error) {
+	// Use config default if maxTokens is not specified or invalid
+	if maxTokens <= 0 {
+		maxTokens = s.DefaultMaxTokens
+	}
 	zap.S().Debugw("executing search",
 		"query", query,
 		"max_tokens", maxTokens)
 
-	// Set parameters for the search
-	params := &search.GenerationParams{
-		Prompt: query,
+	zero := float32(0.0)
+	t := int32(maxTokens)
+
+	if s.DefaultQueryTemplate != "" {
+		query = fmt.Sprintf(s.DefaultQueryTemplate, query)
 	}
 
-	// Apply max tokens if specified
-	if maxTokens > 0 {
-		maxTokensInt32 := int32(maxTokens)
-		params.MaxOutputTokens = &maxTokensInt32
+	// Set parameters for the search
+	params := &search.GenerationParams{
+		Prompt:          query,
+		ModelName:       s.DefaultModel,
+		Temperature:     &zero,
+		MaxOutputTokens: &t,
 	}
 
 	// Execute the search
