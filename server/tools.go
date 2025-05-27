@@ -27,8 +27,8 @@ func registerSearchTool(m *server.MCPServer, s *searcher.Searcher) error {
 	// Define the tool
 	tool := mcp.NewTool("search",
 		mcp.WithDescription("Searches the web using Gemini Grounded Search. Expect more accurate results by searching in a natural language question format rather than by keywords."),
-		mcp.WithString("query",
-			mcp.Description("The search query. Please describe it as if asking a question in natural language, rather than specifying keywords. Example: [What are the most contributive biological factors to human civilizational evolution, according to the latest research?]"),
+		mcp.WithString("question",
+			mcp.Description("The question to be examined. Formulate the question as a complete sentence in natural language. Questions should not be a list of space-separated keywords. Example: [What are the most contributive biological factors to human civilizational evolution, according to the latest research?]"),
 			mcp.Required(),
 		),
 		mcp.WithNumber("max_token",
@@ -38,27 +38,39 @@ func registerSearchTool(m *server.MCPServer, s *searcher.Searcher) error {
 
 	// Add the tool handler
 	m.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		// Extract query parameter
-		query, ok := request.Params.Arguments["query"].(string)
-		if !ok || query == "" {
-			return mcp.NewToolResultError("Missing or empty query parameter"), nil
+		// Extract arguments
+		args, argsOK := request.Params.Arguments.(map[string]any)
+		if !argsOK {
+			return mcp.NewToolResultError("Invalid arguments format"), nil
+		}
+
+		// Extract question parameter
+		questionVal, questionValOK := args["question"]
+		if !questionValOK {
+			return mcp.NewToolResultError("Missing question parameter"), nil
+		}
+		question, questionStrOK := questionVal.(string)
+		if !questionStrOK || question == "" {
+			return mcp.NewToolResultError("Missing or empty question parameter"), nil
 		}
 
 		// Extract max_token parameter (optional)
 		var maxToken int
-		if maxTokenVal, ok := request.Params.Arguments["max_token"].(float64); ok {
-			maxToken = int(maxTokenVal)
+		if maxTokenVal, maxTokenValOK := args["max_token"]; maxTokenValOK {
+			if mt, maxTokenFloatOK := maxTokenVal.(float64); maxTokenFloatOK {
+				maxToken = int(mt)
+			}
 		}
 
 		zap.S().Debugw("executing search",
-			"query", query,
+			"question", question,
 			"max_token", maxToken)
 
 		// Perform search
-		response, err := s.Search(ctx, query, maxToken)
+		response, err := s.Search(ctx, question, maxToken)
 		if err != nil {
 			zap.S().Errorw("failed to search",
-				"query", query,
+				"question", question,
 				"error", err)
 			return mcp.NewToolResultError(err.Error()), nil
 		}
