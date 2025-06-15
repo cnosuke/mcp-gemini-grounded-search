@@ -41,6 +41,7 @@ func NewSearcher(ctx context.Context, cfg *config.Config) (*Searcher, error) {
 	// Initialize the client
 	client, err := search.NewClient(ctx, cfg.Gemini.APIKey,
 		search.WithModelName(cfg.Gemini.ModelName),
+		search.WithNoRedirection(),
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create Gemini client")
