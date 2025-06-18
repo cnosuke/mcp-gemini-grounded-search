@@ -3,7 +3,7 @@ debug: false
 
 gemini:
   api_key: '' # Set via environment variable GEMINI_API_KEY
-  model_name: 'gemini-2.5-flash-preview-05-20'
+  model_name: 'gemini-2.5-flash'
   max_tokens: 5000
   query_template: |
     <constraint>
