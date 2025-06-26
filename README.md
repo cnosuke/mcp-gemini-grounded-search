@@ -40,6 +40,30 @@ To integrate with Claude Desktop using Docker, add an entry to your `claude_desk
 }
 ```
 
+### Usage with Claude Code (Docker)
+
+To integrate with Claude Code using Docker, type the following command in the terminal:
+
+```sh
+claude mcp add-json mcp-gemini-grounded-search '{
+  "command": "docker",
+  "args": [
+    "run",
+    "-i",
+    "--rm",
+    "-e",
+    "GEMINI_API_KEY",
+    "-e",
+    "GEMINI_MODEL_NAME",
+    "cnosuke/mcp-gemini-grounded-search:latest"
+  ],
+  "env": {
+    "GEMINI_MODEL_NAME": "gemini-2.5-flash",
+    "GEMINI_API_KEY": "<your-gemini-api-key>"
+  }
+}'
+```
+
 ## Building and Running (Go Binary)
 
 Alternatively, you can build and run the Go binary directly:
