@@ -55,10 +55,13 @@ claude mcp add-json mcp-gemini-grounded-search '{
     "GEMINI_API_KEY",
     "-e",
     "GEMINI_MODEL_NAME",
+    "-e",
+    "GEMINI_THINKING_LEVEL",
     "cnosuke/mcp-gemini-grounded-search:latest"
   ],
   "env": {
-    "GEMINI_MODEL_NAME": "gemini-2.5-flash",
+    "GEMINI_MODEL_NAME": "gemini-3-flash-preview",
+    "GEMINI_THINKING_LEVEL": "MINIMAL",
     "GEMINI_API_KEY": "<your-gemini-api-key>"
   }
 }'
@@ -90,7 +93,8 @@ To integrate with Claude Desktop using the Go binary, add an entry to your `clau
         "LOG_PATH": "mcp-gemini-grounded-search.log",
         "DEBUG": "false",
         "GEMINI_API_KEY": "your-api-key",
-        "GEMINI_MODEL_NAME": "gemini-2.5-flash-preview-04-17"
+        "GEMINI_MODEL_NAME": "gemini-3-pro-preview",
+        "GEMINI_THINKING_LEVEL": "LOW"
       }
     }
   }
@@ -107,7 +111,9 @@ debug: false # Enable debug mode for verbose logging
 
 gemini:
   api_key: "your-api-key" # Gemini API key
-  model_name: "gemini-2.5-flash-preview-04-17" # Gemini model to use
+  model_name: "gemini-3-pro-preview" # Gemini model to use
+  thinking_level: "LOW" # For Gemini 3 series: MINIMAL, LOW, MEDIUM, HIGH
+  # thinking_budget: 0  # For Gemini 2.5 series: token count (0 to disable)
 ```
 
 You can override configurations using environment variables:
@@ -115,6 +121,8 @@ You can override configurations using environment variables:
 - `DEBUG`: Enable debug mode (true/false)
 - `GEMINI_API_KEY`: Gemini API key
 - `GEMINI_MODEL_NAME`: Gemini model name
+- `GEMINI_THINKING_LEVEL`: Thinking level for Gemini 3 series (MINIMAL/LOW/MEDIUM/HIGH)
+- `GEMINI_THINKING_BUDGET`: Thinking budget for Gemini 2.5 series (token count)
 
 ## Logging
 
@@ -132,6 +140,7 @@ MCP clients interact with the server by sending JSON‐RPC requests to execute v
   * Parameters:
     * `query` (string, required): The search query
     * `max_token` (number, optional): Maximum number of tokens for the generated response
+    * `thinking_level` (string, optional): Thinking level override (MINIMAL/LOW/MEDIUM/HIGH)
 
   * Response format:
     ```json
@@ -163,6 +172,7 @@ Options:
 - `--debug`, `-d`: Enable debug mode (overrides config file)
 - `--api-key`, `-k`: Gemini API key (overrides config file)
 - `--model`, `-m`: Gemini model name (overrides config file)
+- `--thinking-level`: Gemini thinking level: MINIMAL, LOW, MEDIUM, HIGH (overrides config file)
 
 ## Contributing
 

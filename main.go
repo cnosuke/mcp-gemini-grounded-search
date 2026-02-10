@@ -63,6 +63,11 @@ func main() {
 					Usage:   "Gemini model name (overrides config file)",
 					EnvVars: []string{"GEMINI_MODEL_NAME"},
 				},
+				&cli.StringFlag{
+					Name:    "thinking-level",
+					Usage:   "Gemini thinking level: MINIMAL, LOW, MEDIUM, HIGH (overrides config file)",
+					EnvVars: []string{"GEMINI_THINKING_LEVEL"},
+				},
 			},
 			Action: func(c *cli.Context) error {
 				configPath := c.String("config")
@@ -85,6 +90,9 @@ func main() {
 				}
 				if c.IsSet("model") {
 					cfg.Gemini.ModelName = c.String("model")
+				}
+				if c.IsSet("thinking-level") {
+					cfg.Gemini.ThinkingLevel = c.String("thinking-level")
 				}
 
 				// Verify required configurations

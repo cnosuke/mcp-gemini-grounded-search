@@ -38,11 +38,23 @@ func NewSearcher(ctx context.Context, cfg *config.Config) (*Searcher, error) {
 	zap.S().Infow("creating new Searcher",
 		"model_name", cfg.Gemini.ModelName)
 
-	// Initialize the client
-	client, err := search.NewClient(ctx, cfg.Gemini.APIKey,
+	opts := []search.ClientOption{
 		search.WithModelName(cfg.Gemini.ModelName),
 		search.WithNoRedirection(),
-	)
+	}
+
+	if tc := buildThinkingConfig(cfg); tc != nil {
+		opts = append(opts, search.WithDefaultThinkingConfig(tc))
+		budgetLog := "<nil>"
+		if tc.ThinkingBudget != nil {
+			budgetLog = fmt.Sprintf("%d", *tc.ThinkingBudget)
+		}
+		zap.S().Infow("ThinkingConfig enabled",
+			"thinking_level", tc.ThinkingLevel,
+			"thinking_budget", budgetLog)
+	}
+
+	client, err := search.NewClient(ctx, cfg.Gemini.APIKey, opts...)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create Gemini client")
 	}
@@ -61,14 +73,14 @@ func NewSearcher(ctx context.Context, cfg *config.Config) (*Searcher, error) {
 }
 
 // Search - Perform a search with the given query and max token limit
-func (s *Searcher) Search(ctx context.Context, query string, maxTokens int) (*SearchResponse, error) {
-	// Use config default if maxTokens is not specified or invalid
+func (s *Searcher) Search(ctx context.Context, query string, maxTokens int, thinkingLevel string) (*SearchResponse, error) {
 	if maxTokens <= 0 {
 		maxTokens = s.DefaultMaxTokens
 	}
 	zap.S().Debugw("executing search",
 		"query", query,
-		"max_tokens", maxTokens)
+		"max_tokens", maxTokens,
+		"thinking_level", thinkingLevel)
 
 	zero := float32(0.0)
 	t := int32(maxTokens)
@@ -83,6 +95,12 @@ func (s *Searcher) Search(ctx context.Context, query string, maxTokens int) (*Se
 		ModelName:       s.DefaultModel,
 		Temperature:     &zero,
 		MaxOutputTokens: &t,
+	}
+
+	if thinkingLevel != "" {
+		params.ThinkingConfig = &search.ThinkingConfig{
+			ThinkingLevel: search.ThinkingLevel(thinkingLevel),
+		}
 	}
 
 	// Execute the search
@@ -115,6 +133,37 @@ func (s *Searcher) Search(ctx context.Context, query string, maxTokens int) (*Se
 	}
 
 	return response, nil
+}
+
+func buildThinkingConfig(cfg *config.Config) *search.ThinkingConfig {
+	hasLevel := cfg.Gemini.ThinkingLevel != ""
+	hasBudget := cfg.Gemini.ThinkingBudget != nil
+
+	if !hasLevel && !hasBudget {
+		return nil
+	}
+
+	tc := &search.ThinkingConfig{}
+
+	if hasLevel {
+		tc.ThinkingLevel = search.ThinkingLevel(cfg.Gemini.ThinkingLevel)
+	}
+
+	if hasBudget {
+		b := *cfg.Gemini.ThinkingBudget
+		if b < 0 || b > int(^int32(0)>>1) {
+			zap.S().Warnw("thinking_budget out of int32 range, clamping", "original", b)
+			if b < 0 {
+				b = 0
+			} else {
+				b = int(^int32(0) >> 1)
+			}
+		}
+		budget := int32(b)
+		tc.ThinkingBudget = &budget
+	}
+
+	return tc
 }
 
 // ToJSON - Convert search response to JSON string

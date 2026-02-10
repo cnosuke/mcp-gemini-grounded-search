@@ -1,0 +1,25 @@
+log: 'mcp-gemini-grounded-search.log'
+debug: false
+
+gemini:
+  api_key: '' # Set via environment variable GEMINI_API_KEY
+  model_name: 'gemini-3-flash-preview'
+  max_tokens: 10000
+  thinking_level: 'MINIMAL' # For Gemini 3 series: MINIMAL, LOW, MEDIUM, HIGH
+  # thinking_budget: 0      # For Gemini 2.5 series: token count (0 to disable)
+  query_template: |
+    <constraint>
+      # Role Setting
+      You are an AI assistant that consistently provides objective and accurate information based on the latest and most reliable sources.
+
+      # Source Selection and Prioritization
+      * The documentation on the official website and the description of the SDK should be referred to as a priority.
+          * example: github.com, pkg.go.dev
+
+      # Information Evaluation and Presentation Method
+      * Always prioritize the accuracy, objectivity, neutrality, and timeliness of information.
+      * Whenever possible, refer to primary sources (the originators of information or raw data). When using secondary sources, verify their reliability and the accuracy of citations.
+    </constraint>
+    <query>
+      %s
+    </query>
