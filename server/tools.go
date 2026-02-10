@@ -34,6 +34,10 @@ func registerSearchTool(m *server.MCPServer, s *searcher.Searcher) error {
 		mcp.WithNumber("max_token",
 			mcp.Description(fmt.Sprintf("Maximum number of tokens for the response (default: %d)", s.DefaultMaxTokens)),
 		),
+		mcp.WithString("thinking_level",
+			mcp.Description("Thinking level for the model (optional, overrides server default)"),
+			mcp.Enum("MINIMAL", "LOW", "MEDIUM", "HIGH"),
+		),
 	)
 
 	// Add the tool handler
@@ -62,12 +66,20 @@ func registerSearchTool(m *server.MCPServer, s *searcher.Searcher) error {
 			}
 		}
 
+		var thinkingLevel string
+		if tlVal, ok := args["thinking_level"]; ok {
+			if tl, ok := tlVal.(string); ok {
+				thinkingLevel = tl
+			}
+		}
+
 		zap.S().Debugw("executing search",
 			"question", question,
-			"max_token", maxToken)
+			"max_token", maxToken,
+			"thinking_level", thinkingLevel)
 
 		// Perform search
-		response, err := s.Search(ctx, question, maxToken)
+		response, err := s.Search(ctx, question, maxToken, thinkingLevel)
 		if err != nil {
 			zap.S().Errorw("failed to search",
 				"question", question,
