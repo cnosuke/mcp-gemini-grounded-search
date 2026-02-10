@@ -113,7 +113,8 @@ gemini:
   api_key: "your-api-key" # Gemini API key
   model_name: "gemini-3-pro-preview" # Gemini model to use
   thinking_level: "LOW" # For Gemini 3 series: MINIMAL, LOW, MEDIUM, HIGH
-  # thinking_budget: 0  # For Gemini 2.5 series: token count (0 to disable)
+  # thinking_budget: 0  # For Gemini 2.5 series: token count (0 to disable thinking)
+  # Note: When using Gemini 2.5 series, set thinking_level to "" (empty) and use thinking_budget instead
 ```
 
 You can override configurations using environment variables:
@@ -138,7 +139,7 @@ MCP clients interact with the server by sending JSON‐RPC requests to execute v
 
 * `search`: Performs a web search using the Gemini API and returns results with source information.
   * Parameters:
-    * `query` (string, required): The search query
+    * `question` (string, required): The question to search (natural language format recommended)
     * `max_token` (number, optional): Maximum number of tokens for the generated response
     * `thinking_level` (string, optional): Thinking level override (MINIMAL/LOW/MEDIUM/HIGH)
 
