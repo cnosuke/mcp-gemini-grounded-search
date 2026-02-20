@@ -10,7 +10,7 @@ type Config struct {
 	Debug  bool   `yaml:"debug" default:"false" env:"DEBUG"`
 	Gemini struct {
 		APIKey         string `yaml:"api_key" env:"GEMINI_API_KEY" required:"true"`
-		ModelName      string `yaml:"model_name" default:"gemini-3-pro-preview" env:"GEMINI_MODEL_NAME"`
+		ModelName      string `yaml:"model_name" default:"gemini-3.1-pro-preview" env:"GEMINI_MODEL_NAME"`
 		MaxTokens      int    `yaml:"max_tokens" default:"5000" env:"GEMINI_MAX_TOKENS"`
 		QueryTemplate  string `yaml:"query_template" env:"GEMINI_QUERY_TEMPLATE"`
 		ThinkingLevel  string `yaml:"thinking_level" default:"" env:"GEMINI_THINKING_LEVEL"`

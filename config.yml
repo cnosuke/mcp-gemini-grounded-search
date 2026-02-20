@@ -3,7 +3,7 @@ debug: false
 
 gemini:
   api_key: '' # Set via environment variable GEMINI_API_KEY
-  model_name: 'gemini-3-pro-preview'
+  model_name: 'gemini-3.1-pro-preview'
   max_tokens: 5000
   thinking_level: 'LOW' # For Gemini 3 series: MINIMAL, LOW, MEDIUM, HIGH
   # thinking_budget: 0  # For Gemini 2.5 series: token count (0 to disable)
