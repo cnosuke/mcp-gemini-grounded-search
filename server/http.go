@@ -32,17 +32,21 @@ func RunHTTP(cfg *config.Config, name string, version string, revision string) e
 
 	httpServer := mcpserver.NewStreamableHTTPServer(s, opts...)
 
+	// Apply middleware only to MCP handler so /health bypasses auth/CORS checks.
+	// Order: withOriginValidation (outer) → withAuthMiddleware (inner) → httpServer
+	// This allows CORS preflight (OPTIONS without Authorization) to be handled
+	// by withOriginValidation before reaching the auth check.
+	var mcpHandler http.Handler = httpServer
+	mcpHandler = withAuthMiddleware(mcpHandler, cfg.HTTP.AuthToken)
+	mcpHandler = withOriginValidation(mcpHandler, cfg.HTTP.AllowedOrigins)
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", handleHealth)
-	mux.Handle(cfg.HTTP.EndpointPath, httpServer)
-
-	var handler http.Handler = mux
-	handler = withOriginValidation(handler, cfg.HTTP.AllowedOrigins)
-	handler = withAuthMiddleware(handler, cfg.HTTP.AuthToken)
+	mux.Handle("/", mcpHandler)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.HTTP.Port),
-		Handler: handler,
+		Handler: mux,
 	}
 
 	quit := make(chan os.Signal, 1)
@@ -64,13 +68,16 @@ func RunHTTP(cfg *config.Config, name string, version string, revision string) e
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	if err := httpServer.Shutdown(ctx); err != nil {
+	// Use separate contexts to avoid shared timeout depletion between the two shutdowns.
+	mcpCtx, mcpCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer mcpCancel()
+	if err := httpServer.Shutdown(mcpCtx); err != nil {
 		zap.S().Errorw("MCP server shutdown error", "error", err)
 	}
-	if err := srv.Shutdown(ctx); err != nil {
+
+	srvCtx, srvCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer srvCancel()
+	if err := srv.Shutdown(srvCtx); err != nil {
 		zap.S().Errorw("HTTP server shutdown error", "error", err)
 		return err
 	}

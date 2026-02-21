@@ -69,11 +69,6 @@ func envOverrides() map[string]any {
 	if v := os.Getenv("GEMINI_THINKING_LEVEL"); v != "" {
 		m["gemini.thinking_level"] = v
 	}
-	if v := os.Getenv("GEMINI_THINKING_BUDGET"); v != "" {
-		if n, err := strconv.Atoi(v); err == nil {
-			m["gemini.thinking_budget"] = n
-		}
-	}
 	return m
 }
 
