@@ -1,8 +1,10 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/confmap"
@@ -69,6 +71,25 @@ func envOverrides() map[string]any {
 	if v := os.Getenv("GEMINI_THINKING_LEVEL"); v != "" {
 		m["gemini.thinking_level"] = v
 	}
+	if v := os.Getenv("HTTP_PORT"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			m["http.port"] = n
+		}
+	}
+	if v := os.Getenv("HTTP_AUTH_TOKEN"); v != "" {
+		m["http.auth_token"] = v
+	}
+	if v := os.Getenv("HTTP_ENDPOINT_PATH"); v != "" {
+		m["http.endpoint_path"] = v
+	}
+	if v := os.Getenv("HTTP_ALLOWED_ORIGINS"); v != "" {
+		m["http.allowed_origins"] = strings.Split(v, ",")
+	}
+	if v := os.Getenv("HTTP_HEARTBEAT_SECONDS"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			m["http.heartbeat_seconds"] = n
+		}
+	}
 	return m
 }
 
@@ -93,9 +114,11 @@ func LoadConfig(path string) (*Config, error) {
 
 	// Handle ThinkingBudget separately since koanf doesn't support *int natively
 	if v := os.Getenv("GEMINI_THINKING_BUDGET"); v != "" {
-		if n, err := strconv.Atoi(v); err == nil {
-			cfg.Gemini.ThinkingBudget = &n
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return nil, fmt.Errorf("invalid GEMINI_THINKING_BUDGET %q: must be an integer", v)
 		}
+		cfg.Gemini.ThinkingBudget = &n
 	} else if k.Exists("gemini.thinking_budget") {
 		n := k.Int("gemini.thinking_budget")
 		cfg.Gemini.ThinkingBudget = &n

@@ -23,9 +23,7 @@ func RunHTTP(cfg *config.Config, name string, version string, revision string) e
 		return err
 	}
 
-	opts := []mcpserver.StreamableHTTPOption{
-		mcpserver.WithEndpointPath(cfg.HTTP.EndpointPath),
-	}
+	opts := []mcpserver.StreamableHTTPOption{}
 	if cfg.HTTP.HeartbeatSeconds > 0 {
 		opts = append(opts, mcpserver.WithHeartbeatInterval(time.Duration(cfg.HTTP.HeartbeatSeconds)*time.Second))
 	}
@@ -42,7 +40,7 @@ func RunHTTP(cfg *config.Config, name string, version string, revision string) e
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", handleHealth)
-	mux.Handle("/", mcpHandler)
+	mux.Handle(cfg.HTTP.EndpointPath, mcpHandler)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.HTTP.Port),
