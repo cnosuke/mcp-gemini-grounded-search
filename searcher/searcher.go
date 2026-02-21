@@ -7,7 +7,7 @@ import (
 
 	search "github.com/cnosuke/go-gemini-grounded-search"
 	"github.com/cnosuke/mcp-gemini-grounded-search/config"
-	"github.com/cockroachdb/errors"
+	ierrors "github.com/cnosuke/mcp-gemini-grounded-search/internal/errors"
 	"go.uber.org/zap"
 )
 
@@ -56,7 +56,7 @@ func NewSearcher(ctx context.Context, cfg *config.Config) (*Searcher, error) {
 
 	client, err := search.NewClient(ctx, cfg.Gemini.APIKey, opts...)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create Gemini client")
+		return nil, ierrors.Wrap(err, "failed to create Gemini client")
 	}
 
 	defaultMaxTokens := cfg.Gemini.MaxTokens
@@ -114,7 +114,7 @@ func (s *Searcher) Search(ctx context.Context, query string, maxTokens int, thin
 			zap.S().Errorw("content blocked error in search",
 				"error", err)
 		}
-		return nil, errors.Wrap(err, "failed to generate grounded content")
+		return nil, ierrors.Wrap(err, "failed to generate grounded content")
 	}
 
 	// Create response
@@ -170,7 +170,7 @@ func buildThinkingConfig(cfg *config.Config) *search.ThinkingConfig {
 func (r *SearchResponse) ToJSON() (string, error) {
 	bytes, err := json.Marshal(r)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to marshal response to JSON")
+		return "", ierrors.Wrap(err, "failed to marshal response to JSON")
 	}
 	return string(bytes), nil
 }
