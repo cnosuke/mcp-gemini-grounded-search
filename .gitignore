@@ -1,5 +1,7 @@
 bin/
 dist/
 *.md
+!CLAUDE.md
+!README.md
 *.log
 log
