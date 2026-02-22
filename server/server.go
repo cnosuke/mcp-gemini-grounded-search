@@ -4,34 +4,29 @@ import (
 	"context"
 
 	"github.com/cnosuke/mcp-gemini-grounded-search/config"
+	ierrors "github.com/cnosuke/mcp-gemini-grounded-search/internal/errors"
 	"github.com/cnosuke/mcp-gemini-grounded-search/searcher"
-	"github.com/cockroachdb/errors"
 	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpserver "github.com/mark3labs/mcp-go/server"
 	"go.uber.org/zap"
 )
 
-// Run - Execute the MCP server
-func Run(cfg *config.Config, name string, version string, revision string) error {
-	zap.S().Infow("starting MCP Gemini Grounded Search Server")
-
-	// Format version string with revision if available
+// createMCPServer creates and configures an MCP server instance with all tools registered.
+func createMCPServer(cfg *config.Config, name, version, revision string) (*mcpserver.MCPServer, *searcher.Searcher, error) {
 	versionString := version
 	if revision != "" && revision != "xxx" {
 		versionString = versionString + " (" + revision + ")"
 	}
 
-	// Create Searcher
 	zap.S().Debugw("creating Searcher")
 	ctx := context.Background()
 	searcherInstance, err := searcher.NewSearcher(ctx, cfg)
 	if err != nil {
 		zap.S().Errorw("failed to create Searcher", "error", err)
-		return err
+		return nil, nil, err
 	}
 
-	// Create custom hooks for error handling
-	hooks := &server.Hooks{}
+	hooks := &mcpserver.Hooks{}
 	hooks.AddOnError(func(ctx context.Context, id any, method mcp.MCPMethod, message any, err error) {
 		zap.S().Errorw("MCP error occurred",
 			"id", id,
@@ -40,33 +35,33 @@ func Run(cfg *config.Config, name string, version string, revision string) error
 		)
 	})
 
-	// Create MCP server with server name and version
-	zap.S().Debugw("creating MCP server",
-		"name", name,
-		"version", versionString,
-	)
-	mcpServer := server.NewMCPServer(
-		name,
-		versionString,
-		server.WithHooks(hooks),
-	)
+	zap.S().Debugw("creating MCP server", "name", name, "version", versionString)
+	s := mcpserver.NewMCPServer(name, versionString, mcpserver.WithHooks(hooks))
 
-	// Register all tools
 	zap.S().Debugw("registering tools")
-	if err := RegisterAllTools(mcpServer, searcherInstance); err != nil {
+	if err := RegisterAllTools(s, searcherInstance); err != nil {
 		zap.S().Errorw("failed to register tools", "error", err)
+		return nil, nil, err
+	}
+
+	return s, searcherInstance, nil
+}
+
+// RunStdio starts the MCP server with stdio transport.
+func RunStdio(cfg *config.Config, name string, version string, revision string) error {
+	zap.S().Infow("starting MCP Gemini Grounded Search Server (stdio)")
+
+	s, _, err := createMCPServer(cfg, name, version, revision)
+	if err != nil {
 		return err
 	}
 
-	// Start the server with stdio transport
 	zap.S().Infow("starting MCP server")
-	err = server.ServeStdio(mcpServer)
-	if err != nil {
+	if err := mcpserver.ServeStdio(s); err != nil {
 		zap.S().Errorw("failed to start server", "error", err)
-		return errors.Wrap(err, "failed to start server")
+		return ierrors.Wrap(err, "failed to start server")
 	}
 
-	// ServeStdio will block until the server is terminated
 	zap.S().Infow("server shutting down")
 	return nil
 }

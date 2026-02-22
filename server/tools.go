@@ -43,10 +43,7 @@ func registerSearchTool(m *server.MCPServer, s *searcher.Searcher) error {
 	// Add the tool handler
 	m.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Extract arguments
-		args, argsOK := request.Params.Arguments.(map[string]any)
-		if !argsOK {
-			return mcp.NewToolResultError("Invalid arguments format"), nil
-		}
+		args := request.GetArguments()
 
 		// Extract question parameter
 		questionVal, questionValOK := args["question"]
