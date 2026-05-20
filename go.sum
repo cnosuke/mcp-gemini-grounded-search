@@ -10,8 +10,8 @@ github.com/buger/jsonparser v1.1.1 h1:2PnMjfWD7wBILjqQbt530v576A/cAbQvEW9gGIpYMU
 github.com/buger/jsonparser v1.1.1/go.mod h1:6RYKKt7H4d4+iWqouImQ9R2FZql3VbhNgx27UK13J/0=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
-github.com/cnosuke/go-gemini-grounded-search v1.4.0 h1:2fFHixvqonhLSbo68vX+rvvwSueHYm7BiJwW1Kwe3tY=
-github.com/cnosuke/go-gemini-grounded-search v1.4.0/go.mod h1:NmVT6q++n5bppAzNtqz3bqUUsDh1tAzk+Peg4AFbuYU=
+github.com/cnosuke/go-gemini-grounded-search v1.5.0 h1:2sYcjf+nnPFevHppsl/AtzP/N5gBpW4VvmGZEDEh22M=
+github.com/cnosuke/go-gemini-grounded-search v1.5.0/go.mod h1:NmVT6q++n5bppAzNtqz3bqUUsDh1tAzk+Peg4AFbuYU=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/felixge/httpsnoop v1.0.4 h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2Wg=
