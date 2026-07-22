@@ -8,10 +8,9 @@ http:
 
 gemini:
   api_key: '' # Set via environment variable GEMINI_API_KEY
-  model_name: 'gemini-3.5-flash'
+  model_name: 'gemini-3.6-flash'
   max_tokens: 5000
   thinking_level: 'MEDIUM' # For Gemini 3 series: MINIMAL, LOW, MEDIUM, HIGH
-  # thinking_budget: 0  # For Gemini 2.5 series: token count (0 to disable)
   query_template: |
     <constraint>
       # Role Setting

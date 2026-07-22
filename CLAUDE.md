@@ -45,7 +45,7 @@ Configuration priority: **defaults → config.yml → env vars**
 | Env Var | Config Key | Notes |
 |---------|-----------|-------|
 | `GEMINI_API_KEY` | `gemini.api_key` | Required |
-| `GEMINI_MODEL_NAME` | `gemini.model_name` | Default: `gemini-3.5-flash` |
+| `GEMINI_MODEL_NAME` | `gemini.model_name` | Default: `gemini-3.6-flash` |
 | `GEMINI_MAX_TOKENS` | `gemini.max_tokens` | Default: 5000 |
 | `GEMINI_THINKING_LEVEL` | `gemini.thinking_level` | MINIMAL/LOW/MEDIUM/HIGH (Gemini 3.x series) |
 | `GEMINI_THINKING_BUDGET` | `gemini.thinking_budget` | Token count (Gemini 2.5 series) — fails fast on invalid |

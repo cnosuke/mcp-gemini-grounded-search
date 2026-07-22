@@ -37,7 +37,7 @@ func defaultValues() map[string]any {
 	return map[string]any{
 		"log":                    "",
 		"debug":                  false,
-		"gemini.model_name":      "gemini-3.5-flash",
+		"gemini.model_name":      "gemini-3.6-flash",
 		"gemini.max_tokens":      5000,
 		"gemini.thinking_level":  "",
 		"http.port":              8080,

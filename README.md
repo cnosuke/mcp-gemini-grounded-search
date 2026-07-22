@@ -55,7 +55,7 @@ claude mcp add-json mcp-gemini-grounded-search '{
     "server"
   ],
   "env": {
-    "GEMINI_MODEL_NAME": "gemini-3.1-pro-preview",
+    "GEMINI_MODEL_NAME": "gemini-3.6-flash",
     "GEMINI_THINKING_LEVEL": "LOW",
     "GEMINI_API_KEY": "<your-gemini-api-key>"
   }
@@ -118,7 +118,7 @@ debug: false
 
 gemini:
   api_key: ''                      # Set via GEMINI_API_KEY env var
-  model_name: 'gemini-3.1-pro-preview'
+  model_name: 'gemini-3.6-flash'
   max_tokens: 5000
   thinking_level: 'LOW'            # Gemini 3.x series: MINIMAL, LOW, MEDIUM, HIGH
   # thinking_budget: 0             # Gemini 2.5 series: token count (0 = disable thinking)
@@ -138,7 +138,7 @@ Configuration priority: **defaults → config.yml → environment variables**
 | Variable | Description |
 |----------|-------------|
 | `GEMINI_API_KEY` | Gemini API key (required) |
-| `GEMINI_MODEL_NAME` | Model name (default: `gemini-3.1-pro-preview`) |
+| `GEMINI_MODEL_NAME` | Model name (default: `gemini-3.6-flash`) |
 | `GEMINI_MAX_TOKENS` | Max response tokens (default: 5000) |
 | `GEMINI_THINKING_LEVEL` | `MINIMAL` / `LOW` / `MEDIUM` / `HIGH` (Gemini 3.x) |
 | `GEMINI_THINKING_BUDGET` | Token budget for thinking (Gemini 2.5; integer required) |
