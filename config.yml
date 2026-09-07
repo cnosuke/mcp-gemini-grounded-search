@@ -8,7 +8,7 @@ http:
 
 gemini:
   api_key: '' # Set via environment variable GEMINI_API_KEY
-  model_name: 'gemini-3.6-flash'
+  model_name: 'gemini-3.8-flash'
   max_tokens: 5000
   thinking_level: 'MEDIUM' # For Gemini 3 series: MINIMAL, LOW, MEDIUM, HIGH
   query_template: |
