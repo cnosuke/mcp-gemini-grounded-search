@@ -90,12 +90,12 @@ func main() {
 						cfg.Gemini.ThinkingLevel = cmd.String("thinking-level")
 					}
 					if cfg.Gemini.APIKey == "" {
-						return fmt.Errorf("Gemini API key is required. Set it in config.yml or use --api-key flag or GEMINI_API_KEY environment variable")
+						return fmt.Errorf("API key is required: set gemini.api_key in config.yml, or use the --api-key flag or the GEMINI_API_KEY environment variable")
 					}
 					if err := logger.InitLogger(cfg.Debug, cfg.Log); err != nil {
 						return ierrors.Wrap(err, "failed to initialize logger")
 					}
-					defer logger.Sync()
+					defer func() { _ = logger.Sync() }()
 					return server.RunStdio(cfg, Name, Version, Revision)
 				},
 			},
@@ -116,12 +116,12 @@ func main() {
 						return ierrors.Wrap(err, "failed to load configuration file")
 					}
 					if cfg.Gemini.APIKey == "" {
-						return fmt.Errorf("Gemini API key is required. Set it in config.yml or GEMINI_API_KEY environment variable")
+						return fmt.Errorf("API key is required: set gemini.api_key in config.yml or the GEMINI_API_KEY environment variable")
 					}
 					if err := logger.InitLogger(cfg.Debug, cfg.Log); err != nil {
 						return ierrors.Wrap(err, "failed to initialize logger")
 					}
-					defer logger.Sync()
+					defer func() { _ = logger.Sync() }()
 					return server.RunHTTP(cfg, Name, Version, Revision)
 				},
 			},

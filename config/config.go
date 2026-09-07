@@ -97,14 +97,18 @@ func envOverrides() map[string]any {
 func LoadConfig(path string) (*Config, error) {
 	k := koanf.New(".")
 
-	k.Load(confmap.Provider(defaultValues(), "."), nil)
+	if err := k.Load(confmap.Provider(defaultValues(), "."), nil); err != nil {
+		return nil, err
+	}
 
 	if err := k.Load(file.Provider(path), yaml.Parser()); err != nil {
 		return nil, err
 	}
 
 	if overrides := envOverrides(); len(overrides) > 0 {
-		k.Load(confmap.Provider(overrides, "."), nil)
+		if err := k.Load(confmap.Provider(overrides, "."), nil); err != nil {
+			return nil, err
+		}
 	}
 
 	cfg := &Config{}
